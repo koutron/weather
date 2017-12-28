@@ -1,51 +1,70 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import Chart from '../components/chart';
 import Map from '../components/gmaps';
 import Victory from '../components/victory';
-//import GoogleMap from '../components/google_map';
 
 class WeatherList extends Component {
 	renderWeather(cityData) {
+		if(cityData){
 		const name = cityData.city.name;
-		const temps = cityData.list.map(
-			weather => 9 / 5 * (weather.main.temp - 273) + 32
-		);
-		const pressures = cityData.list.map(weather => weather.main.pressure);
-		const humidities = cityData.list.map(weather => weather.main.humidity);
 		const { lon, lat } = cityData.city.coord;
+		const weatherArr = [];
 
+		cityData.list.map(val => {
+			return weatherArr.push({
+				date: val.dt_txt,
+				temp: 9 / 5 * (val.main.temp - 273) + 32,
+				pressure: val.main.pressure,
+				humidity: val.main.humidity
+			});
+		});
 		return (
 			<div key={name} className="weather-container">
 				<span className="weather-data">{<Map lon={lon} lat={lat} />}</span>
-
 				<span className="weather-data">
-					<Victory data={cityData} />
-
-					{/*}<Chart data={temps} color="black" units="°F" />*/}
+					<Victory
+						data={weatherArr}
+						weatherProperty={'temp'}
+						color={'84B93B'}
+					/>
 				</span>
-
 				<span className="weather-data">
-					<Chart data={pressures} color="grey" units="hPa" />
+					<Victory
+						data={weatherArr}
+						weatherProperty={'humidity'}
+						color={'2D6580'}
+					/>
 				</span>
-
 				<span className="weather-data">
-					<Chart data={humidities} color="blue" units="%" />
+					<Victory
+						data={weatherArr}
+						weatherProperty={'pressure'}
+						color={'57348A'}
+					/>
 				</span>
 			</div>
 		);
+	}
+	}
+
+	showHeaders() {
+		if (this.props.weather.length !== 0) {
+			return (
+				<div className="weather-container">
+					<p className="weather-data">City</p>
+					<p className="weather-data">Temperature (°F)</p>
+
+					<p className="weather-data">Humidity (%)</p>
+					<p className="weather-data">Pressure (hPa)</p>
+				</div>
+			);
+		}
 	}
 
 	render() {
 		return (
 			<div>
-				<div className="weather-container">
-					<p className="weather-header">City</p>
-					<p className="weather-header">Temperature (°F)</p>
-					<p className="weather-header">Pressure (hPa)</p>
-					<p className="weather-header">Humidity (%)</p>
-				</div>
-
+				{this.showHeaders()}
 				{this.props.weather.map(this.renderWeather)}
 			</div>
 		);
